@@ -1,0 +1,254 @@
+<mujoco model="mecanum_robot">
+  <!-- 4 geared motors + 4 mecanum wheels (your Right_wheel / Left_wheel STLs). Meshes are mm -> scale 0.001.
+       Needs in models/meshes/: lower_base, upper_base, bar_link, motor_holder, Right_wheel, Left_wheel (.stl) -->
+  <compiler angle="degree" meshdir="meshes" autolimits="true"/>
+  <option timestep="0.001" gravity="0 0 -9.81" integrator="implicitfast" cone="elliptic" impratio="10"/>
+
+  <default>
+    <default class="part">
+      <geom type="mesh" density="1240" rgba="0.75 0.75 0.78 1" contype="2" conaffinity="0"/>
+    </default>
+    <default class="visual">
+      <geom contype="0" conaffinity="0" group="1"/>
+    </default>
+    <default class="roller">
+      <!-- invisible physics rollers (10 per wheel, hinged at 45 deg); the wheel STL is drawn on the hub for looks -->
+      <geom type="ellipsoid" mass="0.008" rgba="0.15 0.15 0.15 0" group="3" contype="4" conaffinity="0"
+            friction="1.0 0.005 0.0001" condim="3"/>
+    </default>
+  </default>
+
+  <asset>
+    <mesh name="lower_base"   file="lower_base.stl"   scale="0.001 0.001 0.001"/>
+    <mesh name="upper_base"   file="upper_base.stl"   scale="0.001 0.001 0.001"/>
+    <mesh name="bar_link"     file="bar_link.stl"     scale="0.001 0.001 0.001"/>
+    <mesh name="motor_holder" file="motor_holder.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="Right_wheel"  file="Right_wheel.stl"  scale="0.001 0.001 0.001"/>
+    <mesh name="Left_wheel"   file="Left_wheel.stl"   scale="0.001 0.001 0.001"/>
+    <texture type="skybox" builtin="gradient" rgb1="0.6 0.7 0.9" rgb2="0.1 0.1 0.2" width="256" height="256"/>
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.25 0.27 0.3" rgb2="0.2 0.22 0.25" width="300" height="300"/>
+    <material name="grid" texture="grid" texrepeat="8 8" reflectance="0.05"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 2" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
+    <geom name="floor" type="plane" size="5 5 0.05" material="grid" contype="1" conaffinity="6" friction="1.0 0.005 0.0001"/>
+
+    <body name="chassis" pos="0 0 0.0683">
+      <freejoint name="chassis_free"/>
+      <geom class="part" name="lower_base" mesh="lower_base" rgba="0.3 0.5 0.8 1"/>
+      <geom class="part" name="bar_fl" mesh="bar_link" pos="0.015 0.015 0.010" rgba="0.8 0.8 0.8 1"/>
+      <geom class="part" name="bar_fr" mesh="bar_link" pos="0.195 0.015 0.010" rgba="0.8 0.8 0.8 1"/>
+      <geom class="part" name="bar_bl" mesh="bar_link" pos="0.015 0.160 0.010" rgba="0.8 0.8 0.8 1"/>
+      <geom class="part" name="bar_br" mesh="bar_link" pos="0.195 0.160 0.010" rgba="0.8 0.8 0.8 1"/>
+      <geom class="part" name="upper_base" mesh="upper_base" pos="0 0 0.085" rgba="0.3 0.7 0.5 1"/>
+      <site name="robot_center" pos="0.105 0.0875 0" size="0.004"/>
+
+      <!-- motor holders under the lower plate -->
+      <geom class="part" name="holder_fl" mesh="motor_holder" pos="0.16000 0.13500 0" euler="0 180 0" rgba="0.9 0.5 0.2 1"/>
+      <geom class="part" name="holder_fr" mesh="motor_holder" pos="0.16000 0.04000 0" euler="180 0 0" rgba="0.9 0.5 0.2 1"/>
+      <geom class="part" name="holder_rl" mesh="motor_holder" pos="0.05000 0.13500 0" euler="0 180 0" rgba="0.9 0.5 0.2 1"/>
+      <geom class="part" name="holder_rr" mesh="motor_holder" pos="0.05000 0.04000 0" euler="180 0 0" rgba="0.9 0.5 0.2 1"/>
+
+      <!-- geared motors (visual + mass only) -->
+      <geom class="visual" name="gearbox_fl" type="cylinder" fromto="0.16000 0.16700 -0.01430 0.16000 0.14000 -0.01430" size="0.0185" mass="0.10" rgba="0.93 0.9 0.6 1"/>
+      <geom class="visual" name="can_fl" type="cylinder" fromto="0.16000 0.14000 -0.01430 0.16000 0.09500 -0.01430" size="0.014" mass="0.12" rgba="0.7 0.7 0.72 1"/>
+      <geom class="visual" name="shaft_fl" type="cylinder" fromto="0.16000 0.16700 -0.01430 0.16000 0.22500 -0.01430" size="0.003" mass="0.005" rgba="0.8 0.8 0.85 1"/>
+      <geom class="visual" name="gearbox_fr" type="cylinder" fromto="0.16000 0.00800 -0.01430 0.16000 0.03500 -0.01430" size="0.0185" mass="0.10" rgba="0.93 0.9 0.6 1"/>
+      <geom class="visual" name="can_fr" type="cylinder" fromto="0.16000 0.03500 -0.01430 0.16000 0.08000 -0.01430" size="0.014" mass="0.12" rgba="0.7 0.7 0.72 1"/>
+      <geom class="visual" name="shaft_fr" type="cylinder" fromto="0.16000 0.00800 -0.01430 0.16000 -0.05000 -0.01430" size="0.003" mass="0.005" rgba="0.8 0.8 0.85 1"/>
+      <geom class="visual" name="gearbox_rl" type="cylinder" fromto="0.05000 0.16700 -0.01430 0.05000 0.14000 -0.01430" size="0.0185" mass="0.10" rgba="0.93 0.9 0.6 1"/>
+      <geom class="visual" name="can_rl" type="cylinder" fromto="0.05000 0.14000 -0.01430 0.05000 0.09500 -0.01430" size="0.014" mass="0.12" rgba="0.7 0.7 0.72 1"/>
+      <geom class="visual" name="shaft_rl" type="cylinder" fromto="0.05000 0.16700 -0.01430 0.05000 0.22500 -0.01430" size="0.003" mass="0.005" rgba="0.8 0.8 0.85 1"/>
+      <geom class="visual" name="gearbox_rr" type="cylinder" fromto="0.05000 0.00800 -0.01430 0.05000 0.03500 -0.01430" size="0.0185" mass="0.10" rgba="0.93 0.9 0.6 1"/>
+      <geom class="visual" name="can_rr" type="cylinder" fromto="0.05000 0.03500 -0.01430 0.05000 0.08000 -0.01430" size="0.014" mass="0.12" rgba="0.7 0.7 0.72 1"/>
+      <geom class="visual" name="shaft_rr" type="cylinder" fromto="0.05000 0.00800 -0.01430 0.05000 -0.05000 -0.01430" size="0.003" mass="0.005" rgba="0.8 0.8 0.85 1"/>
+
+      <!-- mecanum wheels -->
+      <body name="wheel_fl" pos="0.16000 0.20900 -0.01430">
+        <joint name="wheel_fl_j" type="hinge" axis="0 1 0" damping="1e-4"/>
+        <geom class="visual" name="wheel_fl_mesh" type="mesh" mesh="Left_wheel" xyaxes="1 0 0 0 0 1" mass="0.06" rgba="0.18 0.18 0.2 1"/>
+        <body name="wheel_fl_r0" pos="0.03902 0 0.01260">
+          <joint name="wheel_fl_r0_j" type="hinge" axis="-0.21733 -0.70711 0.67288" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.21733 -0.70711 0.67288"/>
+        </body>
+        <body name="wheel_fl_r1" pos="0.02416 0 0.03313">
+          <joint name="wheel_fl_r1_j" type="hinge" axis="-0.57134 -0.70711 0.41662" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.57134 -0.70711 0.41662"/>
+        </body>
+        <body name="wheel_fl_r2" pos="0.00007 0 0.04100">
+          <joint name="wheel_fl_r2_j" type="hinge" axis="-0.70711 -0.70711 0.00123" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.70711 -0.70711 0.00123"/>
+        </body>
+        <body name="wheel_fl_r3" pos="-0.02404 0 0.03321">
+          <joint name="wheel_fl_r3_j" type="hinge" axis="-0.57279 -0.70711 -0.41463" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.57279 -0.70711 -0.41463"/>
+        </body>
+        <body name="wheel_fl_r4" pos="-0.03897 0 0.01274">
+          <joint name="wheel_fl_r4_j" type="hinge" axis="-0.21968 -0.70711 -0.67212" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.21968 -0.70711 -0.67212"/>
+        </body>
+        <body name="wheel_fl_r5" pos="-0.03902 0 -0.01260">
+          <joint name="wheel_fl_r5_j" type="hinge" axis="0.21733 -0.70711 -0.67288" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.21733 -0.70711 -0.67288"/>
+        </body>
+        <body name="wheel_fl_r6" pos="-0.02416 0 -0.03313">
+          <joint name="wheel_fl_r6_j" type="hinge" axis="0.57134 -0.70711 -0.41662" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.57134 -0.70711 -0.41662"/>
+        </body>
+        <body name="wheel_fl_r7" pos="-0.00007 0 -0.04100">
+          <joint name="wheel_fl_r7_j" type="hinge" axis="0.70711 -0.70711 -0.00123" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.70711 -0.70711 -0.00123"/>
+        </body>
+        <body name="wheel_fl_r8" pos="0.02404 0 -0.03321">
+          <joint name="wheel_fl_r8_j" type="hinge" axis="0.57279 -0.70711 0.41463" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.57279 -0.70711 0.41463"/>
+        </body>
+        <body name="wheel_fl_r9" pos="0.03897 0 -0.01274">
+          <joint name="wheel_fl_r9_j" type="hinge" axis="0.21968 -0.70711 0.67212" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.21968 -0.70711 0.67212"/>
+        </body>
+      </body>
+      <body name="wheel_fr" pos="0.16000 -0.03400 -0.01430">
+        <joint name="wheel_fr_j" type="hinge" axis="0 1 0" damping="1e-4"/>
+        <geom class="visual" name="wheel_fr_mesh" type="mesh" mesh="Right_wheel" xyaxes="1 0 0 0 0 1" mass="0.06" rgba="0.18 0.18 0.2 1"/>
+        <body name="wheel_fr_r0" pos="0.03902 0 0.01260">
+          <joint name="wheel_fr_r0_j" type="hinge" axis="-0.21733 0.70711 0.67288" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.21733 0.70711 0.67288"/>
+        </body>
+        <body name="wheel_fr_r1" pos="0.02416 0 0.03313">
+          <joint name="wheel_fr_r1_j" type="hinge" axis="-0.57134 0.70711 0.41662" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.57134 0.70711 0.41662"/>
+        </body>
+        <body name="wheel_fr_r2" pos="0.00007 0 0.04100">
+          <joint name="wheel_fr_r2_j" type="hinge" axis="-0.70711 0.70711 0.00123" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.70711 0.70711 0.00123"/>
+        </body>
+        <body name="wheel_fr_r3" pos="-0.02404 0 0.03321">
+          <joint name="wheel_fr_r3_j" type="hinge" axis="-0.57279 0.70711 -0.41463" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.57279 0.70711 -0.41463"/>
+        </body>
+        <body name="wheel_fr_r4" pos="-0.03897 0 0.01274">
+          <joint name="wheel_fr_r4_j" type="hinge" axis="-0.21968 0.70711 -0.67212" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.21968 0.70711 -0.67212"/>
+        </body>
+        <body name="wheel_fr_r5" pos="-0.03902 0 -0.01260">
+          <joint name="wheel_fr_r5_j" type="hinge" axis="0.21733 0.70711 -0.67288" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.21733 0.70711 -0.67288"/>
+        </body>
+        <body name="wheel_fr_r6" pos="-0.02416 0 -0.03313">
+          <joint name="wheel_fr_r6_j" type="hinge" axis="0.57134 0.70711 -0.41662" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.57134 0.70711 -0.41662"/>
+        </body>
+        <body name="wheel_fr_r7" pos="-0.00007 0 -0.04100">
+          <joint name="wheel_fr_r7_j" type="hinge" axis="0.70711 0.70711 -0.00123" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.70711 0.70711 -0.00123"/>
+        </body>
+        <body name="wheel_fr_r8" pos="0.02404 0 -0.03321">
+          <joint name="wheel_fr_r8_j" type="hinge" axis="0.57279 0.70711 0.41463" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.57279 0.70711 0.41463"/>
+        </body>
+        <body name="wheel_fr_r9" pos="0.03897 0 -0.01274">
+          <joint name="wheel_fr_r9_j" type="hinge" axis="0.21968 0.70711 0.67212" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.21968 0.70711 0.67212"/>
+        </body>
+      </body>
+      <body name="wheel_rl" pos="0.05000 0.20900 -0.01430">
+        <joint name="wheel_rl_j" type="hinge" axis="0 1 0" damping="1e-4"/>
+        <geom class="visual" name="wheel_rl_mesh" type="mesh" mesh="Right_wheel" xyaxes="-1 0 0 0 0 1" mass="0.06" rgba="0.18 0.18 0.2 1"/>
+        <body name="wheel_rl_r0" pos="-0.03902 0 0.01260">
+          <joint name="wheel_rl_r0_j" type="hinge" axis="-0.21733 0.70711 -0.67288" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.21733 0.70711 -0.67288"/>
+        </body>
+        <body name="wheel_rl_r1" pos="-0.02416 0 0.03313">
+          <joint name="wheel_rl_r1_j" type="hinge" axis="-0.57134 0.70711 -0.41662" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.57134 0.70711 -0.41662"/>
+        </body>
+        <body name="wheel_rl_r2" pos="-0.00007 0 0.04100">
+          <joint name="wheel_rl_r2_j" type="hinge" axis="-0.70711 0.70711 -0.00123" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.70711 0.70711 -0.00123"/>
+        </body>
+        <body name="wheel_rl_r3" pos="0.02404 0 0.03321">
+          <joint name="wheel_rl_r3_j" type="hinge" axis="-0.57279 0.70711 0.41463" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.57279 0.70711 0.41463"/>
+        </body>
+        <body name="wheel_rl_r4" pos="0.03897 0 0.01274">
+          <joint name="wheel_rl_r4_j" type="hinge" axis="-0.21968 0.70711 0.67212" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.21968 0.70711 0.67212"/>
+        </body>
+        <body name="wheel_rl_r5" pos="0.03902 0 -0.01260">
+          <joint name="wheel_rl_r5_j" type="hinge" axis="0.21733 0.70711 0.67288" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.21733 0.70711 0.67288"/>
+        </body>
+        <body name="wheel_rl_r6" pos="0.02416 0 -0.03313">
+          <joint name="wheel_rl_r6_j" type="hinge" axis="0.57134 0.70711 0.41662" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.57134 0.70711 0.41662"/>
+        </body>
+        <body name="wheel_rl_r7" pos="0.00007 0 -0.04100">
+          <joint name="wheel_rl_r7_j" type="hinge" axis="0.70711 0.70711 0.00123" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.70711 0.70711 0.00123"/>
+        </body>
+        <body name="wheel_rl_r8" pos="-0.02404 0 -0.03321">
+          <joint name="wheel_rl_r8_j" type="hinge" axis="0.57279 0.70711 -0.41463" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.57279 0.70711 -0.41463"/>
+        </body>
+        <body name="wheel_rl_r9" pos="-0.03897 0 -0.01274">
+          <joint name="wheel_rl_r9_j" type="hinge" axis="0.21968 0.70711 -0.67212" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.21968 0.70711 -0.67212"/>
+        </body>
+      </body>
+      <body name="wheel_rr" pos="0.05000 -0.03400 -0.01430">
+        <joint name="wheel_rr_j" type="hinge" axis="0 1 0" damping="1e-4"/>
+        <geom class="visual" name="wheel_rr_mesh" type="mesh" mesh="Left_wheel" xyaxes="-1 0 0 0 0 1" mass="0.06" rgba="0.18 0.18 0.2 1"/>
+        <body name="wheel_rr_r0" pos="-0.03902 0 0.01260">
+          <joint name="wheel_rr_r0_j" type="hinge" axis="-0.21733 -0.70711 -0.67288" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.21733 -0.70711 -0.67288"/>
+        </body>
+        <body name="wheel_rr_r1" pos="-0.02416 0 0.03313">
+          <joint name="wheel_rr_r1_j" type="hinge" axis="-0.57134 -0.70711 -0.41662" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.57134 -0.70711 -0.41662"/>
+        </body>
+        <body name="wheel_rr_r2" pos="-0.00007 0 0.04100">
+          <joint name="wheel_rr_r2_j" type="hinge" axis="-0.70711 -0.70711 -0.00123" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.70711 -0.70711 -0.00123"/>
+        </body>
+        <body name="wheel_rr_r3" pos="0.02404 0 0.03321">
+          <joint name="wheel_rr_r3_j" type="hinge" axis="-0.57279 -0.70711 0.41463" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.57279 -0.70711 0.41463"/>
+        </body>
+        <body name="wheel_rr_r4" pos="0.03897 0 0.01274">
+          <joint name="wheel_rr_r4_j" type="hinge" axis="-0.21968 -0.70711 0.67212" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="-0.21968 -0.70711 0.67212"/>
+        </body>
+        <body name="wheel_rr_r5" pos="0.03902 0 -0.01260">
+          <joint name="wheel_rr_r5_j" type="hinge" axis="0.21733 -0.70711 0.67288" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.21733 -0.70711 0.67288"/>
+        </body>
+        <body name="wheel_rr_r6" pos="0.02416 0 -0.03313">
+          <joint name="wheel_rr_r6_j" type="hinge" axis="0.57134 -0.70711 0.41662" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.57134 -0.70711 0.41662"/>
+        </body>
+        <body name="wheel_rr_r7" pos="0.00007 0 -0.04100">
+          <joint name="wheel_rr_r7_j" type="hinge" axis="0.70711 -0.70711 0.00123" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.70711 -0.70711 0.00123"/>
+        </body>
+        <body name="wheel_rr_r8" pos="-0.02404 0 -0.03321">
+          <joint name="wheel_rr_r8_j" type="hinge" axis="0.57279 -0.70711 -0.41463" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.57279 -0.70711 -0.41463"/>
+        </body>
+        <body name="wheel_rr_r9" pos="-0.03897 0 -0.01274">
+          <joint name="wheel_rr_r9_j" type="hinge" axis="0.21968 -0.70711 -0.67212" damping="1e-5" armature="1e-6"/>
+          <geom class="roller" size="0.009 0.009 0.02904" zaxis="0.21968 -0.70711 -0.67212"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <!-- velocity servo ~ DC motor: torque = kv*(cmd - w), capped at stall torque (edit forcerange/kv from datasheet) -->
+    <velocity name="motor_fl" joint="wheel_fl_j" kv="0.02865" ctrlrange="-20.944 20.944" forcerange="-0.6 0.6"/>
+    <velocity name="motor_fr" joint="wheel_fr_j" kv="0.02865" ctrlrange="-20.944 20.944" forcerange="-0.6 0.6"/>
+    <velocity name="motor_rl" joint="wheel_rl_j" kv="0.02865" ctrlrange="-20.944 20.944" forcerange="-0.6 0.6"/>
+    <velocity name="motor_rr" joint="wheel_rr_j" kv="0.02865" ctrlrange="-20.944 20.944" forcerange="-0.6 0.6"/>
+  </actuator>
+</mujoco>
