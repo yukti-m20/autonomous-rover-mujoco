@@ -4,7 +4,7 @@ A 4-wheel **mecanum rover** simulated in [MuJoCo](https://mujoco.org), built fro
 The long-term goal is an autonomous rover for **uneven-terrain navigation and environment monitoring**, with
 wheel odometry, onboard sensing and a path from simulation to the real hardware.
 
-![Rover in MuJoCo](docs/images/rover_sim.png)
+![Rover in MuJoCo](screenshot.png)
 
 ---
 
